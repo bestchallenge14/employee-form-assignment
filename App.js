@@ -1,21 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Link } from 'react-router-dom';
-import './App.css';
 import EmployeeForm from './components/EmployeeForm';
+// Corrected path to point inside the components folder
+import './components/EmployeeForm.css'; 
 
-// Week 4: Employee List Component
 function EmployeeList(props) {
-  // Render the employee list
   return (
     <div className="employee-list">
-      <h1>Employee List</h1>
+      <h2>Employee List</h2>
       <ul>
         {props.employees.map((employee) => (
-          <li key={employee.EmployeeId}>
-            {/* Create a link to the employee detail page */}
-            <Link to={`/employees/${employee.EmployeeId}`}>
+          <li key={employee.EmployeeId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', marginBottom: '10px' }}>
+            <span style={{ fontSize: '1.1em', fontWeight: 'bold' }}>
               {employee.name}
-            </Link>
+            </span>
+            <button 
+              onClick={() => props.deleteEmployee(employee.EmployeeId)}
+              style={{ padding: '4px 8px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+            >
+              Delete
+            </button>
           </li>
         ))}
       </ul>
@@ -23,40 +26,33 @@ function EmployeeList(props) {
   );
 }
 
-// Main App Component
 function App() {
   const [employees, setEmployees] = useState([]);
 
   useEffect(() => {
-    // Retrieve data from local storage when the component loads
-    const storedEmployees = localStorage.getItem('employees');
-    if (storedEmployees) {
-      setEmployees(JSON.parse(storedEmployees));
+    const savedData = localStorage.getItem('employees');
+    if (savedData) {
+      setEmployees(JSON.parse(savedData));
     }
   }, []);
 
-  const saveData = (newEmployeesArray) => {
-    // Convert the array to a string and save it
-    localStorage.setItem('employees', JSON.stringify(newEmployeesArray));
-  };
-
   const addEmployee = (newEmployee) => {
-    // Add the new employee to the list and save it
     const updatedEmployees = [...employees, newEmployee];
     setEmployees(updatedEmployees);
-    saveData(updatedEmployees);
+    localStorage.setItem('employees', JSON.stringify(updatedEmployees));
+  };
+
+  const deleteEmployee = (idToDelete) => {
+    const updatedEmployees = employees.filter((employee) => employee.EmployeeId !== idToDelete);
+    setEmployees(updatedEmployees);
+    localStorage.setItem('employees', JSON.stringify(updatedEmployees));
   };
 
   return (
-    <Router>
-      <div className="App">
-        {/* Pass the addEmployee function as a prop to the form */}
-        <EmployeeForm addEmployee={addEmployee} />
-        
-        {/* Display the Employee List */}
-        <EmployeeList employees={employees} />
-      </div>
-    </Router>
+    <div className="App">
+      <EmployeeForm addEmployee={addEmployee} />
+      <EmployeeList employees={employees} deleteEmployee={deleteEmployee} />
+    </div>
   );
 }
 
